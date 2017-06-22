@@ -1,29 +1,36 @@
 package com.example.shon.lifecycle_activity;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.arch.lifecycle.LifecycleActivity;
 import android.os.Bundle;
-import android.view.View;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.shon.lifecycle_activity.fragment.ProductFragment;
+import com.example.shon.lifecycle_activity.fragment.ProductListFragment;
+import com.example.shon.lifecycle_activity.model.Product;
+
+public class MainActivity extends LifecycleActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Task task = new Task();
-                task.setOnFinishListener(new Task.OnFinishListener() {
-                    @Override
-                    public void onFinish() {
-                        startActivity(new Intent(getApplicationContext(), Main2Activity.class));
-                        finish();
-                    }
-                });
-                task.execute();
-            }
-        });
+        // Add product list fragment if this is first creation
+        if (savedInstanceState == null) {
+            ProductListFragment fragment = new ProductListFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, fragment, ProductListFragment.TAG).commit();
+        }
+    }
+
+    /** Shows the product detail fragment */
+    public void show(Product product) {
+
+        ProductFragment productFragment = ProductFragment.forProduct(product.getId());
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack("product")
+                .replace(R.id.fragment_container,
+                        productFragment, null).commit();
     }
 }
